@@ -3,7 +3,6 @@ Ever wondered how long it would take you to complete college? Are you done explo
 
 The College Length Estimator (CLE) is a program I've been working on for two years (two months for the GUI version with help from a friend) that gives the user an estimate on how long it would take for them to complete a set number of courses under ideal conditions. 
 
-![Screenshot](assets/CLEGUIPicture.png)
 ![Screenshot](assets/CLEGUIPicturewResults.png)
 
 ## Features
