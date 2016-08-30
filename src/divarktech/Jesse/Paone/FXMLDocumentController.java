@@ -432,7 +432,7 @@ public class FXMLDocumentController implements Initializable
                     fileSeeker.getExtensionFilters().addAll(
                             new ExtensionFilter("Text Files", "*.txt", "*.text", "*.rtf"),
                             new ExtensionFilter("All Files", "*.*"));
-                    fileSeeker.setInitialFileName("myCollegePlanResults.rtf");
+                    fileSeeker.setInitialFileName("myCollegePlanResults.txt");
                     File usersFile = fileSeeker.showSaveDialog(null);
 
                     if (usersFile == null)
