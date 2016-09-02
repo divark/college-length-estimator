@@ -333,7 +333,11 @@ public class CLEImplementation {
                         } else {
                             int termExclusiveInflation = 0;
                             if(yearCount > 1) {
-                                termExclusiveInflation = (yearCount - 1) * myAmountOfTermsInYear;
+                                if(mySummerTermLimit != 0) {
+                                    termExclusiveInflation = (yearCount - 1) * (myAmountOfTermsInYear + 1);
+                                } else {
+                                    termExclusiveInflation = (yearCount - 1) * myAmountOfTermsInYear;
+                                }
                             }
                             if(!myCurrentCourse.getTermExclusiveIdentifiers().isEmpty()) {
                                 for(Integer myCurrentCourseTermExclusive : myCurrentCourse.getTermExclusiveIdentifiers())
