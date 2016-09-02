@@ -1755,7 +1755,11 @@ public class FXMLDocumentController implements Initializable
         Summer.setSelected(false);
         BtnDel.setDisable(true);
         ComboBoxTermExclusive.getItems().clear();
+        ComboBoxTermExclusive.setDisable(true);
+        listViewTermExclusive.getItems().clear();
         checkBoxToggleTermExclusive.setSelected(false);
+        btnAddTermExclusive.setDisable(true);
+        btnRemoveTermExclusive.setDisable(true);
     }
 
     //Tyler: Added these functions to make the menu buttons work.
