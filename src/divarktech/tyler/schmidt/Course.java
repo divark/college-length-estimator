@@ -33,6 +33,8 @@ public class Course {
     private boolean summerCompatible;
     private String summerCompatibleGUIWorkAround;
     private int nextTermIndex;
+    private ArrayList<Integer> termExclusiveIdentifiers;
+    private String termExclusiveGUIWorkAround;
     private boolean isNowUsed;
 
     public Course() {
@@ -45,6 +47,8 @@ public class Course {
         summerCompatible = false;
         summerCompatibleGUIWorkAround = "";
         nextTermIndex = 0;
+        termExclusiveIdentifiers = new ArrayList<>();
+        termExclusiveGUIWorkAround = "";
         isNowUsed = false;
     }
     
@@ -70,6 +74,8 @@ public class Course {
         concurrentCourses = new ArrayList<>();
         summerCompatible = false;
         nextTermIndex = 0;
+        termExclusiveIdentifiers = new ArrayList<>();
+        termExclusiveGUIWorkAround = "";
         isNowUsed = false;
     }
     
@@ -83,20 +89,26 @@ public class Course {
         myCourseContents += mySeperator + "Course Units:" + courseUnits;
         
         myCourseContents += mySeperator + "Prerequisites:";
-        String myPrerequisitesSeperator = ",";
+        String myMultipleItemsSeperator = ",";
         for(Course myPrerequisiteCourse: preRequisites) {
             myCourseContents += myPrerequisiteCourse.getCourseName() + 
-                    myPrerequisitesSeperator;
+                    myMultipleItemsSeperator;
         }
         
         myCourseContents += mySeperator + "Concurrents:";
         for(Course myConcurrentCourse : concurrentCourses) {
             myCourseContents += myConcurrentCourse.getCourseName() + 
-                    myPrerequisitesSeperator;
+                    myMultipleItemsSeperator;
         }
         
-        myCourseContents += mySeperator + "Summer Compatible:" + summerCompatible
-                + osLineSeperator;
+        myCourseContents += mySeperator + "Summer Compatible:" + summerCompatible;
+        
+        myCourseContents += mySeperator + "Term Exclusives:";
+        for(Integer myTermExclusive : getTermExclusiveIdentifiers())
+        {
+            myCourseContents += myTermExclusive + myMultipleItemsSeperator;
+        }
+        myCourseContents += osLineSeperator;
         return myCourseContents;
     }
     
@@ -362,5 +374,29 @@ public class Course {
      */
     public void setSummerCompatibleGUIWorkAround(String summerCompatibleGUIWorkAround) {
         this.summerCompatibleGUIWorkAround = summerCompatibleGUIWorkAround;
+    }
+
+    /**
+     * @return the termExclusiveGUIWorkAround
+     */
+    public String getTermExclusiveGUIWorkAround()
+    {
+        return termExclusiveGUIWorkAround;
+    }
+
+    /**
+     * @param termExclusiveGUIWorkAround the termExclusiveGUIWorkAround to set
+     */
+    public void setTermExclusiveGUIWorkAround(String termExclusiveGUIWorkAround)
+    {
+        this.termExclusiveGUIWorkAround = termExclusiveGUIWorkAround;
+    }
+
+    /**
+     * @return the termExclusiveIdentifiers
+     */
+    public ArrayList<Integer> getTermExclusiveIdentifiers()
+    {
+        return termExclusiveIdentifiers;
     }
 }

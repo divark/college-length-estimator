@@ -284,12 +284,16 @@ public class CLEImplementation {
             RawCourseList myRawCourseList) throws Exception {
         ArrayList<Term> myTermList = new ArrayList<>();
         int myTermIndex = 0;
+        int yearCount = 1;
         long mySeed = System.nanoTime();
         RawCourseList myShuffledListOfRawCourses = new RawCourseList();
         myShuffledListOfRawCourses.getMyRawCourseList().addAll(myRawCourseList.getMyRawCourseList());
         Collections.shuffle(myShuffledListOfRawCourses.getMyRawCourseList(), new Random(mySeed));
         
         while(!hasFullyUsedCourses(myShuffledListOfRawCourses.getMyRawCourseList())) {
+            if(myTermIndex != 0 && myTermIndex % myAmountOfTermsInYear == 0) {
+                yearCount++;
+            }
             Term myCurrentTerm = new Term();
             
             try {
@@ -304,6 +308,7 @@ public class CLEImplementation {
                 throw new Exception(invalidTermLimit.getMessage());
             }
 
+            courseSearch:
             for(int i = 0; i < myShuffledListOfRawCourses.getMyRawCourseList().size(); i++) {
                 Course myCurrentCourse = myShuffledListOfRawCourses.getMyRawCourseList().get(i);
                 
@@ -316,6 +321,7 @@ public class CLEImplementation {
                     getCurrentCoursePrerequisite(myShuffledListOfRawCourses.getMyRawCourseList().get(i),
                             myCurrentTerm, myTermIndex, myTermLimit, mySummerTermLimit);
                 }
+                
                 if(myCurrentCourse.getNextTermIndex() == myTermIndex && !myCurrentCourse.isIsNowUsed()) {
                     try {
                         if(myCurrentTerm.isIsSummerTerm() && !myCurrentCourse.isSummerCompatible()) {
@@ -325,8 +331,25 @@ public class CLEImplementation {
                                 myCurrentCourse.incrementNextTermIndex();
                             }
                         } else {
-                            myCurrentTerm.addToTerm(myCurrentCourse);
-                            myCurrentCourse.setIsNowUsed(true);
+                            int termExclusiveInflation = 0;
+                            if(yearCount > 1) {
+                                termExclusiveInflation = (yearCount - 1) * myAmountOfTermsInYear;
+                            }
+                            if(!myCurrentCourse.getTermExclusiveIdentifiers().isEmpty()) {
+                                for(Integer myCurrentCourseTermExclusive : myCurrentCourse.getTermExclusiveIdentifiers())
+                                {
+                                    if((myCurrentCourseTermExclusive + termExclusiveInflation) % (myTermIndex + 1) == 0) {
+                                        myCurrentTerm.addToTerm(myCurrentCourse);
+                                        myCurrentCourse.setIsNowUsed(true);
+                                        i = -1;
+                                        continue courseSearch;
+                                    }
+                                }
+                                myCurrentCourse.incrementNextTermIndex();
+                            } else {
+                                myCurrentTerm.addToTerm(myCurrentCourse);
+                                myCurrentCourse.setIsNowUsed(true);
+                            }
                         }
                     } catch(Exception courseWontFitInTerm) {
                         if(myCurrentCourse.getCourseUnits() > myTermLimit && myCurrentCourse.getCourseUnits() > mySummerTermLimit) {
@@ -342,7 +365,7 @@ public class CLEImplementation {
                 }
             }
             //Just in case a summer term is empty.
-            if(!myCurrentTerm.getMyCourses().isEmpty()) {
+            if(!(myCurrentTerm.getMyCourses().isEmpty() && myCurrentTerm.isIsSummerTerm())) {
                 myTermList.add(myCurrentTerm);
             }
             myTermIndex++;

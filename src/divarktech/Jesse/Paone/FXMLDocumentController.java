@@ -75,6 +75,23 @@ public class FXMLDocumentController implements Initializable
     private AnchorPane myWindow;
 
     private Course myCourse = new Course();
+    
+    //Tyler: Section for Term Exclusive Processing:
+    @FXML
+    private ComboBox ComboBoxTermExclusive;
+    
+    @FXML
+    private CheckBox checkBoxToggleTermExclusive;
+    
+    @FXML
+    private ListView listViewTermExclusive;
+    
+    @FXML
+    private Button btnAddTermExclusive;
+    
+    @FXML
+    private Button btnRemoveTermExclusive;
+    //End Section for Term Exclusive Processing
 
     //Added by Tyler:
     private String myPastSelection = "";
@@ -173,6 +190,9 @@ public class FXMLDocumentController implements Initializable
     private TableColumn<Course, String> concurrentCol;
     @FXML
     private TableColumn<Course, String> summerCol;
+    //Added by Tyler:
+    @FXML
+    private TableColumn<Course, String> tblColTermExclusive;
 
     //Functions Start
     //Started by Jesse, modified by Tyler:
@@ -233,12 +253,12 @@ public class FXMLDocumentController implements Initializable
             isInErrorState = false;
 
             ArrayList<Term> myTermList = null;
-            if (txtFldAmountOfTerms.isDisabled() && txtFldSummerTermLimit.isDisabled())
+            if (txtFldSummerTermLimit.isDisabled())
             {
                 try
                 {
                     myTermList = processTerms(Double.parseDouble(UnitLimit.getText()),
-                            0, 0, mainList);
+                            0, Integer.parseInt(txtFldAmountOfTerms.getText()), mainList);
                 }
                 catch (Exception interpretiveError)
                 {
@@ -278,11 +298,12 @@ public class FXMLDocumentController implements Initializable
                 courseInRawCourseList.usageReset();
             }
 
-            Alert myResults = new Alert(AlertType.CONFIRMATION);
+            Alert myResults = new Alert(AlertType.INFORMATION);
             myResults.setTitle("Results");
-            myResults.setHeaderText("Here are the courses processed");
+            myResults.setHeaderText("Here's your estimate:");
             String processedTerms = "";
-            if (txtFldAmountOfTerms.isDisabled())
+
+            if (txtFldSummerTermLimit.isDisabled())
             {
                 processedTerms = printTerms(myTermList, TermType.getText(),
                         0, Double.parseDouble(UnitLimit.getText()), 0);
@@ -351,12 +372,12 @@ public class FXMLDocumentController implements Initializable
                     courseInMyRawCourseList.usageReset();
                 }
 
-                if (txtFldAmountOfTerms.isDisabled() && txtFldSummerTermLimit.isDisabled())
+                if (txtFldSummerTermLimit.isDisabled())
                 {
                     try
                     {
                         myTermList = processTerms(Double.parseDouble(UnitLimit.getText()),
-                                0, 0, mainList);
+                            0, Integer.parseInt(txtFldAmountOfTerms.getText()), mainList);
                     }
                     catch (Exception interpretiveError)
                     {
@@ -395,8 +416,8 @@ public class FXMLDocumentController implements Initializable
 
                 myResults = new Alert(AlertType.CONFIRMATION);
                 myResults.setTitle("Results");
-                myResults.setHeaderText("Here are the courses processed");
-                if (txtFldAmountOfTerms.isDisabled())
+                myResults.setHeaderText("Here's your estimate:");
+                if (txtFldSummerTermLimit.isDisabled())
                 {
                     processedTerms = printTerms(myTermList, TermType.getText(),
                             0, Double.parseDouble(UnitLimit.getText()), 0);
@@ -551,6 +572,7 @@ public class FXMLDocumentController implements Initializable
                 }
 
                 SummerSet();
+                updateComboBoxTermExclusive();
 
                 try
                 {
@@ -585,6 +607,7 @@ public class FXMLDocumentController implements Initializable
             }
         }
         makeSummerFieldsEditableIfSummerCoursesExist();
+        updateComboBoxTermExclusive();
     }
 
     @FXML
@@ -1132,6 +1155,60 @@ public class FXMLDocumentController implements Initializable
             mainTable.getColumns().get(0).setVisible(false);
             mainTable.getColumns().get(0).setVisible(true);
     }
+    
+    @FXML
+    private void BtnAddTermExclusiveClick(ActionEvent userHasClicked)
+    {
+        if(ComboBoxTermExclusive.getSelectionModel().isEmpty())
+        {
+            return;
+        }
+        
+        if(!myCourse.getTermExclusiveIdentifiers().contains(
+                Integer.parseInt(ComboBoxTermExclusive.getSelectionModel()
+                        .getSelectedItem().toString()))) {
+            myCourse.getTermExclusiveIdentifiers().add(Integer.parseInt(
+                    ComboBoxTermExclusive.getSelectionModel().getSelectedItem()
+                            .toString()));
+            listViewTermExclusive.getItems().add(ComboBoxTermExclusive
+                    .getSelectionModel().getSelectedItem().toString());
+            
+            myCourse.setTermExclusiveGUIWorkAround("Yes");
+        }
+        //Tyler: Workaround used from Daniel De Leon's answer:
+        //http://stackoverflow.com/questions/11065140/javafx-2-1-tableview-refresh-items
+        mainTable.getColumns().get(0).setVisible(false);
+        mainTable.getColumns().get(0).setVisible(true);
+    }
+    
+    @FXML
+    private void BtnRemoveTermExclusiveClick(ActionEvent userHasClicked)
+    {
+        if(listViewTermExclusive.getSelectionModel().getSelectedItem() == null)
+        {
+            return;
+        }
+
+        if(myCourse.getTermExclusiveIdentifiers().contains(
+                Integer.parseInt(listViewTermExclusive.getSelectionModel()
+                        .getSelectedItem().toString()))) {
+            Integer myTermExclusive = Integer.parseInt(
+                    listViewTermExclusive.getSelectionModel().getSelectedItem().toString());
+            
+            myCourse.getTermExclusiveIdentifiers().remove(myTermExclusive);
+            listViewTermExclusive.getItems().remove(ComboBoxTermExclusive
+                    .getSelectionModel().getSelectedItem().toString());
+            
+            if(myCourse.getTermExclusiveIdentifiers().isEmpty()) 
+            {
+                myCourse.setTermExclusiveGUIWorkAround("No");
+            }
+        }
+        //Tyler: Workaround used from Daniel De Leon's answer:
+        //http://stackoverflow.com/questions/11065140/javafx-2-1-tableview-refresh-items
+        mainTable.getColumns().get(0).setVisible(false);
+        mainTable.getColumns().get(0).setVisible(true);
+    }
 
     private void setNewAvailable()
     {
@@ -1158,6 +1235,7 @@ public class FXMLDocumentController implements Initializable
         }
 
         makeSummerFieldsEditableIfSummerCoursesExist();
+        updateComboBoxTermExclusive();
         //Tyler: Workaround used from Daniel De Leon's answer:
         //http://stackoverflow.com/questions/11065140/javafx-2-1-tableview-refresh-items
         mainTable.getColumns().get(0).setVisible(false);
@@ -1177,7 +1255,7 @@ public class FXMLDocumentController implements Initializable
                 return;
             }
         }
-        txtFldAmountOfTerms.setDisable(true);
+        //txtFldAmountOfTerms.setDisable(true);
         txtFldSummerTermLimit.setDisable(true);
     }
 
@@ -1458,6 +1536,7 @@ public class FXMLDocumentController implements Initializable
             concurList.setDisable(true);
             Summer.setSelected(false);
             BtnDel.setDisable(true);
+            updateComboBoxTermExclusive();
             return;
         }
         CourseName.clear();
@@ -1516,20 +1595,27 @@ public class FXMLDocumentController implements Initializable
         Summer.setSelected(myCourse.isSummerCompatible());
         BtnDel.setDisable(false);
         setNewAvailable();
+        updateComboBoxTermExclusive();
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
+        ObservableList<String> options = 
+            FXCollections.observableArrayList(
+                "1");
         Prereqs.setItems(AvailableCourses);
         Concurs.setItems(AvailableCourses);
+        ComboBoxTermExclusive.setItems(options);
+        ComboBoxTermExclusive.setDisable(true);
 
         courseNameCol.setCellValueFactory(new PropertyValueFactory<>("courseName"));
         unitsCol.setCellValueFactory(new PropertyValueFactory<>("courseUnits"));
         prerequsiteCol.setCellValueFactory(new PropertyValueFactory<>("prerequisitesGUIWorkAround"));
         concurrentCol.setCellValueFactory(new PropertyValueFactory<>("concurrentGUIWorkAround"));
         summerCol.setCellValueFactory(new PropertyValueFactory<>("summerCompatibleGUIWorkAround"));
-        txtFldAmountOfTerms.setDisable(true);
+        tblColTermExclusive.setCellValueFactory(new PropertyValueFactory<>("termExclusiveGUIWorkAround"));
+        //txtFldAmountOfTerms.setDisable(true);
         txtFldSummerTermLimit.setDisable(true);
 
         //Tyler: Used Uluk Biy's answer to make the textfield only
@@ -1666,6 +1752,8 @@ public class FXMLDocumentController implements Initializable
         concurList.setDisable(true);
         Summer.setSelected(false);
         BtnDel.setDisable(true);
+        ComboBoxTermExclusive.getItems().clear();
+        checkBoxToggleTermExclusive.setSelected(false);
     }
 
     //Tyler: Added these functions to make the menu buttons work.
@@ -1998,7 +2086,7 @@ public class FXMLDocumentController implements Initializable
         if (myTermInfoArray[2].equals(""))
         {
             txtFldAmountOfTerms.setText("");
-            txtFldAmountOfTerms.setDisable(true);
+            //txtFldAmountOfTerms.setDisable(true);
         }
         else
         {
@@ -2021,7 +2109,8 @@ public class FXMLDocumentController implements Initializable
         {
             String myInputLine = inputFile.nextLine().replace("Course Name:", "")
                     .replace("Course Units:", "").replace("Prerequisites:", "")
-                    .replace("Concurrents:", "").replace("Summer Compatible:", "");
+                    .replace("Concurrents:", "").replace("Summer Compatible:", "")
+                    .replace("Term Exclusives:", "");
             courseInformationFromLine = myInputLine.split("\\|");
 
             try
@@ -2043,6 +2132,35 @@ public class FXMLDocumentController implements Initializable
                 }
 
                 myCourseRead.setSummerCompatible(Boolean.parseBoolean(courseInformationFromLine[4]));
+                
+                if(courseInformationFromLine.length == 6 && 
+                        !courseInformationFromLine[5].equals(""))
+                {
+                    String termExclusivesForThisCourse[] = courseInformationFromLine[5].split(",");
+                    
+                    for(String myTermExclusiveString : termExclusivesForThisCourse)
+                    {
+                        if(!myCourseRead.getTermExclusiveIdentifiers().
+                                contains(Integer.parseInt(myTermExclusiveString))
+                                && Integer.parseInt(myTermExclusiveString) != 0)
+                        {
+                            myCourseRead.getTermExclusiveIdentifiers().add(
+                                Integer.parseInt(myTermExclusiveString));
+                        }
+                    }
+                    if(!myCourseRead.getTermExclusiveIdentifiers().isEmpty()) 
+                    {
+                        myCourseRead.setTermExclusiveGUIWorkAround("Yes");
+                    }
+                    else 
+                    {
+                        myCourseRead.setTermExclusiveGUIWorkAround("No");
+                    }
+                }
+                else
+                {
+                    myCourseRead.setTermExclusiveGUIWorkAround("No");
+                }
                 myNewRawCourseList.addToList(myCourseRead);
             }
             catch (Exception interpretiveException)
@@ -2064,7 +2182,6 @@ public class FXMLDocumentController implements Initializable
                     TermType.clear();
                     UnitLimit.clear();
                     txtFldAmountOfTerms.clear();
-                    txtFldAmountOfTerms.setDisable(true);
                     txtFldSummerTermLimit.clear();
                     txtFldSummerTermLimit.setDisable(true);
                     usersInputFileName = "";
@@ -2102,7 +2219,7 @@ public class FXMLDocumentController implements Initializable
                         TermType.clear();
                         UnitLimit.clear();
                         txtFldAmountOfTerms.clear();
-                        txtFldAmountOfTerms.setDisable(true);
+                        //txtFldAmountOfTerms.setDisable(true);
                         txtFldSummerTermLimit.clear();
                         txtFldSummerTermLimit.setDisable(true);
                         myErrorAlert.showAndWait();
@@ -2147,7 +2264,7 @@ public class FXMLDocumentController implements Initializable
                             TermType.clear();
                             UnitLimit.clear();
                             txtFldAmountOfTerms.clear();
-                            txtFldAmountOfTerms.setDisable(true);
+                            //txtFldAmountOfTerms.setDisable(true);
                             txtFldSummerTermLimit.clear();
                             txtFldSummerTermLimit.setDisable(true);
                             myErrorAlert.showAndWait();
@@ -2241,5 +2358,157 @@ public class FXMLDocumentController implements Initializable
                 + " - Course Processing Logic/GUI Tweaks\nJesse Paone"
                 + " - GUI Design");
         myAboutPage.showAndWait();
+    }
+    
+    @FXML
+    private void amountOfTermsUpdateComboBoxPrompt(KeyEvent userInput)
+    {
+        boolean hasTermExclusiveCourseInList = false;
+        for(Course myCourseInRawCourseList : mainList.getMyRawCourseList())
+        {
+            if(!myCourseInRawCourseList.getTermExclusiveIdentifiers().isEmpty())
+            {
+                hasTermExclusiveCourseInList = true;
+                break;
+            }
+        }
+        
+        if(hasTermExclusiveCourseInList)
+        {
+            Alert amountOfTermsChangeWarning = new Alert(AlertType.CONFIRMATION);
+            amountOfTermsChangeWarning.getDialogPane().getChildren().stream()
+                .filter(node -> node instanceof Label).forEach(node -> 
+                        ((Label)node).setMinHeight(Region.USE_PREF_SIZE));
+            amountOfTermsChangeWarning.setTitle("Term Amount Change Warning");
+            amountOfTermsChangeWarning.setHeaderText("Term Amount Change Confirmation");
+            amountOfTermsChangeWarning.setContentText("Changing this will reset"
+                    + " all courses back to being non-term exclusive. Are you"
+                    + " sure you want to do this?");
+            
+            Optional<ButtonType> userResponse = amountOfTermsChangeWarning.showAndWait();
+            
+            if(userResponse.get() == ButtonType.OK)
+            {
+                int myPastMyCourseLocation = mainList.getMyRawCourseList().indexOf(myCourse);
+                
+                for(Course myCourseInRawCourseList : mainList.getMyRawCourseList())
+                {
+                    myCourse = myCourseInRawCourseList;
+                    myCourse.getTermExclusiveIdentifiers().clear();
+                    updateComboBoxTermExclusive();
+                }
+                if(myPastMyCourseLocation != -1)
+                {
+                    myCourse = mainList.getMyRawCourseList().get(myPastMyCourseLocation);
+                }
+                else
+                {
+                    myCourse = new Course();
+                }
+            }
+            else
+            {
+                userInput.consume();
+            }
+        }
+        else
+        {
+            updateComboBoxTermExclusive();
+        }
+    }
+    
+    @FXML
+    private void updateComboBoxTermExclusive()
+    {
+        if(!myCourse.getTermExclusiveIdentifiers().isEmpty() && !(txtFldAmountOfTerms.getText().equals("0") || txtFldAmountOfTerms.getText().equals("")))
+        {
+            ComboBoxTermExclusive.setDisable(false);
+            checkBoxToggleTermExclusive.setSelected(true);
+            btnAddTermExclusive.setDisable(false);
+            btnRemoveTermExclusive.setDisable(false);
+            listViewTermExclusive.setDisable(false);
+            ComboBoxTermExclusive.getItems().clear();
+            listViewTermExclusive.getItems().clear();
+            
+            int amountOfTerms = Integer.parseInt(txtFldAmountOfTerms.getText());
+            if(myCourse.isSummerCompatible())
+            {
+                amountOfTerms++;
+            }
+            
+            for(int i = 1; i <= amountOfTerms; i++)
+            {
+                ComboBoxTermExclusive.getItems().add(i);
+            }
+            
+            for(Integer myCourseTermExclusive : myCourse.getTermExclusiveIdentifiers())
+            {
+                listViewTermExclusive.getItems().add(myCourseTermExclusive);
+            }
+            myCourse.setTermExclusiveGUIWorkAround("Yes");
+        }
+        else
+        {
+            ComboBoxTermExclusive.getItems().clear();
+            ComboBoxTermExclusive.setDisable(true);
+            checkBoxToggleTermExclusive.setSelected(false);
+            btnAddTermExclusive.setDisable(true);
+            btnRemoveTermExclusive.setDisable(true);
+            listViewTermExclusive.getItems().clear();
+            listViewTermExclusive.setDisable(true);
+            
+            myCourse.setTermExclusiveGUIWorkAround("No");
+        }
+        //Tyler: Workaround used from Daniel De Leon's answer:
+        //http://stackoverflow.com/questions/11065140/javafx-2-1-tableview-refresh-items
+        mainTable.getColumns().get(0).setVisible(false);
+        mainTable.getColumns().get(0).setVisible(true);
+    }
+    
+    @FXML
+    private void toggleTermExclusiveComboBox()
+    {
+        if(checkBoxToggleTermExclusive.isSelected() && !(txtFldAmountOfTerms.getText().equals("0") || txtFldAmountOfTerms.getText().equals("")))
+        {
+            ComboBoxTermExclusive.setDisable(false);
+            btnAddTermExclusive.setDisable(false);
+            btnRemoveTermExclusive.setDisable(false);
+            ComboBoxTermExclusive.getItems().clear();
+            listViewTermExclusive.setDisable(false);
+            
+            int amountOfTerms = Integer.parseInt(txtFldAmountOfTerms.getText());
+            if(Summer.isSelected())
+            {
+                amountOfTerms++;
+            }
+            
+            for(int i = 1; i <= amountOfTerms; i++)
+            {
+                ComboBoxTermExclusive.getItems().add(i);
+            }
+            myCourse.setTermExclusiveGUIWorkAround("Yes");
+        }
+        else
+        {
+            checkBoxToggleTermExclusive.setSelected(false);
+            ComboBoxTermExclusive.setDisable(true);
+            btnAddTermExclusive.setDisable(true);
+            btnRemoveTermExclusive.setDisable(true);
+            myCourse.getTermExclusiveIdentifiers().clear();
+            listViewTermExclusive.getItems().clear();
+            listViewTermExclusive.setDisable(true);
+            
+            if(txtFldAmountOfTerms.getText().equals("0") || txtFldAmountOfTerms.getText().equals(""))
+            {
+                txtFldAmountOfTerms.requestFocus();
+            }
+            myCourse.setTermExclusiveGUIWorkAround("No");
+        }
+        
+        //Tyler: Workaround used from Daniel De Leon's answer:
+        //http://stackoverflow.com/questions/11065140/javafx-2-1-tableview-refresh-items
+        mainTable.getColumns().get(0).setVisible(false);
+        mainTable.getColumns().get(0).setVisible(true);
+        hasUnsavedData = true;
     }
 }
