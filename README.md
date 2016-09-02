@@ -10,6 +10,7 @@ The College Length Estimator (CLE) is a program I've been working on for two yea
 - Define how many of that term are in a year excluding summer. (Such as for a Semester, 2, and for a Quarter, 3)
 - Enforce a unit limit for both normal and summer terms.
 - Adding courses with prerequisites and concurrents with real-time changes reflected on the table.
+- New! Define if a course is exclusive to a certain term. (Will be shown as numbers. Quarter example: will count up to 3. If you choose 1, you are saying that it is exclusive to Fall (or whatever you want the 1st quarter to be) quarters.)
 - Sort table elements by the provided course information.
 - Provides a report in a .txt by default that is different every time when processed on how many terms it require to complete the courses given.
 - Able to include additional information for summer courses in summer terms in the report.
