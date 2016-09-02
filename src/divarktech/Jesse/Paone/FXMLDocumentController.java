@@ -1179,6 +1179,7 @@ public class FXMLDocumentController implements Initializable
         //http://stackoverflow.com/questions/11065140/javafx-2-1-tableview-refresh-items
         mainTable.getColumns().get(0).setVisible(false);
         mainTable.getColumns().get(0).setVisible(true);
+        hasUnsavedData = true;
     }
     
     @FXML
@@ -1208,6 +1209,7 @@ public class FXMLDocumentController implements Initializable
         //http://stackoverflow.com/questions/11065140/javafx-2-1-tableview-refresh-items
         mainTable.getColumns().get(0).setVisible(false);
         mainTable.getColumns().get(0).setVisible(true);
+        hasUnsavedData = true;
     }
 
     private void setNewAvailable()
