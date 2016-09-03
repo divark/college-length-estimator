@@ -430,12 +430,13 @@ public class CLEImplementation {
         if(!myCourse.getTermExclusiveIdentifiers().isEmpty()) {
             ArrayList<Integer> termExclusivesThatWork = new ArrayList<>();
             
+            startOver:
             for(Integer myTermExclusive : myCourse.getTermExclusiveIdentifiers()) {
                 for(Course courseInConcurrentChain : myConcurrentChain) {
                     if(!courseInConcurrentChain.getTermExclusiveIdentifiers().isEmpty()
                             && !courseInConcurrentChain.getTermExclusiveIdentifiers()
                                     .contains(myTermExclusive)) {
-                        break;
+                        continue startOver;
                     }
                 }
                 termExclusivesThatWork.add(myTermExclusive);
