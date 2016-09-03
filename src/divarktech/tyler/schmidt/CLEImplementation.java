@@ -315,11 +315,12 @@ public class CLEImplementation {
                 if(!myCurrentCourse.getConcurrentCourses().isEmpty()) {
                     myCurrentCourse = concurrentProcessing(myCurrentCourse, 
                             myCurrentTerm, myTermLimit, mySummerTermLimit, 
-                            myTermIndex);
+                            myTermIndex, myAmountOfTermsInYear, yearCount);
                 } else if(!myCurrentCourse.getPreRequisites().isEmpty()) {
                     myCurrentCourse = 
                     getCurrentCoursePrerequisite(myShuffledListOfRawCourses.getMyRawCourseList().get(i),
-                            myCurrentTerm, myTermIndex, myTermLimit, mySummerTermLimit);
+                            myCurrentTerm, myTermIndex, myTermLimit, mySummerTermLimit,
+                            myAmountOfTermsInYear, yearCount);
                 }
                 
                 if(myCurrentCourse.getNextTermIndex() == myTermIndex && !myCurrentCourse.isIsNowUsed()) {
@@ -340,8 +341,7 @@ public class CLEImplementation {
                                 }
                             }
                             if(!myCurrentCourse.getTermExclusiveIdentifiers().isEmpty()) {
-                                for(Integer myCurrentCourseTermExclusive : myCurrentCourse.getTermExclusiveIdentifiers())
-                                {
+                                for(Integer myCurrentCourseTermExclusive : myCurrentCourse.getTermExclusiveIdentifiers()) {
                                     if((myCurrentCourseTermExclusive + termExclusiveInflation) % (myTermIndex + 1) == 0) {
                                         myCurrentTerm.addToTerm(myCurrentCourse);
                                         myCurrentCourse.setIsNowUsed(true);
@@ -378,7 +378,8 @@ public class CLEImplementation {
     }
     
     public static Course concurrentProcessing(Course myCourse, Term myCurrentTerm, 
-            double myTermLimit, double mySummerTermLimit, int myTermIndex) throws Exception {
+            double myTermLimit, double mySummerTermLimit, int myTermIndex,
+            int myAmountOfTerms, int myYearCount) throws Exception {
         if(myCourse.isIsNowUsed() || myCourse.getNextTermIndex() != myTermIndex) {
             return myCourse;
         }
@@ -414,13 +415,60 @@ public class CLEImplementation {
                     myConcurrentCourse.incrementNextTermIndex();
                 }
                 return getCurrentCoursePrerequisite(courseInConcurrentChain, 
-                        myCurrentTerm, myTermIndex, myTermLimit, mySummerTermLimit);
+                        myCurrentTerm, myTermIndex, myTermLimit, mySummerTermLimit,
+                        myAmountOfTerms, myYearCount);
             } else if(courseInConcurrentChain.getNextTermIndex() != myCourse.getNextTermIndex()) {
                 myCourse.incrementNextTermIndex();
                 return myCourse;
             } else if(myCurrentTerm.getMyCourses().containsAll(courseInConcurrentChain.getPreRequisites())
                     && !courseInConcurrentChain.getPreRequisites().isEmpty()) {
                 myCourse.incrementNextTermIndex();
+                return myCourse;
+            }
+        }
+        
+        if(!myCourse.getTermExclusiveIdentifiers().isEmpty()) {
+            ArrayList<Integer> termExclusivesThatWork = new ArrayList<>();
+            
+            for(Integer myTermExclusive : myCourse.getTermExclusiveIdentifiers()) {
+                for(Course courseInConcurrentChain : myConcurrentChain) {
+                    if(!courseInConcurrentChain.getTermExclusiveIdentifiers().isEmpty()
+                            && !courseInConcurrentChain.getTermExclusiveIdentifiers()
+                                    .contains(myTermExclusive)) {
+                        break;
+                    }
+                }
+                termExclusivesThatWork.add(myTermExclusive);
+            }
+            
+            if(termExclusivesThatWork.isEmpty()) {
+                throw new Exception(myCourse.getCourseName() + "'s concurrent chain"
+                        + " has an impossible term exclusive pattern.");
+            }
+            
+            int termExclusiveInflation = 0;
+            if(myYearCount > 1) {
+                if(mySummerTermLimit != 0) {
+                    termExclusiveInflation = (myYearCount - 1) * (myAmountOfTerms + 1);
+                } else {
+                    termExclusiveInflation = (myYearCount - 1) * myAmountOfTerms;
+                }
+            }
+            
+            //Check to see if what works matches what term we're looking at
+            //right now.
+            boolean isInRightTerm = false;
+            for(Integer myTermExclusiveThatWorks : termExclusivesThatWork) {
+                if((myTermExclusiveThatWorks + termExclusiveInflation) % (myTermIndex + 1) == 0) {
+                    isInRightTerm = true;
+                    break;
+                }
+            }
+            
+            if(!isInRightTerm) {
+                for(Course courseInConcurrentChain : myConcurrentChain) {
+                    courseInConcurrentChain.incrementNextTermIndex();
+                }
                 return myCourse;
             }
         }
@@ -446,7 +494,8 @@ public class CLEImplementation {
     }
     
     public static Course getCurrentCoursePrerequisite(Course myCourse, Term currentTerm,
-            int myTermIndex, double myTermLimit, double mySummerTermLimit) throws Exception {
+            int myTermIndex, double myTermLimit, double mySummerTermLimit,
+            int myAmountOfTerms, int myYearCount) throws Exception {
         ArrayList<Course> myPrerequisiteProblemCheck = new ArrayList<>();
        
         myPrerequisiteProblemCheck.add(myCourse);
@@ -473,7 +522,8 @@ public class CLEImplementation {
                 && !myCourse.getPreRequisites().get(0).isIsNowUsed()) {
             myCourse.incrementNextTermIndex();
             return concurrentProcessing(myCourse.getPreRequisites().get(0), 
-                    currentTerm, myTermLimit, mySummerTermLimit, myTermIndex);
+                    currentTerm, myTermLimit, mySummerTermLimit, myTermIndex,
+                    myAmountOfTerms, myYearCount);
         }
         
         if(myCourse.getNextTermIndex() == myTermIndex && !myCourse.isIsNowUsed()) {
@@ -485,7 +535,8 @@ public class CLEImplementation {
                     
                     Course myPrerequisiteCourse = myCourse.getPreRequisites().get(0);
                     return getCurrentCoursePrerequisite(myPrerequisiteCourse, 
-                            currentTerm, myTermIndex, myTermLimit, mySummerTermLimit);
+                            currentTerm, myTermIndex, myTermLimit, mySummerTermLimit,
+                            myAmountOfTerms, myYearCount);
                 } else if(!myCourse.getPreRequisites().isEmpty() && hasFullyUsedCourses(myCourse.getPreRequisites())) {
                     if(myCourse.getNextTermIndex() == myCourse.getPreRequisites().get(0).getNextTermIndex()) {
                         myCourse.incrementNextTermIndex();
