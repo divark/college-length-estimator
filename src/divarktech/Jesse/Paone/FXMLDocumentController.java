@@ -1197,8 +1197,8 @@ public class FXMLDocumentController implements Initializable
                     listViewTermExclusive.getSelectionModel().getSelectedItem().toString());
             
             myCourse.getTermExclusiveIdentifiers().remove(myTermExclusive);
-            listViewTermExclusive.getItems().remove(ComboBoxTermExclusive
-                    .getSelectionModel().getSelectedItem().toString());
+            listViewTermExclusive.getItems().remove(listViewTermExclusive
+                    .getSelectionModel().getSelectedItem());
             
             if(myCourse.getTermExclusiveIdentifiers().isEmpty()) 
             {
