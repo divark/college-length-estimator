@@ -663,6 +663,9 @@ public class FXMLDocumentController implements Initializable
                     Units.clear();
                     CurrentPrereqs.clear();
                     CurrentConcurs.clear();
+                    listViewTermExclusive.getItems().clear();
+                    checkBoxToggleTermExclusive.setSelected(false);
+                    listViewTermExclusive.setDisable(true);
                     PrereqCheck.setSelected(false);
                     Prereqs.setDisable(true);
                     AddPrereq.setDisable(true);
