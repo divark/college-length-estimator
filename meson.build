@@ -6,7 +6,6 @@ qt6_module = import('qt6')
 subdir('src')
 incldir = include_directories('include')
 moc_files = qt6_module.compile_moc(headers: 'include/courseviewer.hpp', include_directories: incldir, dependencies: dependencies)
-generated_ui_headers = qt6_module.compile_ui(sources: files('src/ui/courseviewer.ui')) 
 
 exe = executable('cle', sources, generated_ui_headers, moc_files, include_directories: incldir, dependencies: dependencies)
 
