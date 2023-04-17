@@ -1,6 +1,11 @@
-#include <iostream>
+#include <QApplication>
 
-int main() {
-    std::cout << "Hello!!" << std::endl;
-    return 0;
+#include "courseviewer.hpp"
+
+int main(int argc, char *argv[]) {
+    QApplication app(argc, argv);
+	CourseViewer courseViewer;
+	courseViewer.show();
+
+	return app.exec();
 }
